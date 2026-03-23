@@ -60,7 +60,7 @@ function closeAuthModal(e) {
 
 /* ── Submit ── */
 
-let authSubmitting = false;
+var authSubmitting = false;
 
 async function submitAuth() {
   if (authSubmitting) return;
