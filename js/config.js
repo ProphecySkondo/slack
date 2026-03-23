@@ -17,8 +17,8 @@
    For local dev you can also just replace the fallback strings below.
    ================================================================ */
 
-var SUPABASE_URL  = window.ENV_SUPABASE_URL      || '';
-var SUPABASE_ANON = window.ENV_SUPABASE_ANON_KEY  || '';
+var SUPABASE_URL  = ENV_SUPABASE_URL      || '';
+var SUPABASE_ANON = ENV_SUPABASE_ANON_KEY  || '';
 
 // Guard: if keys aren't set yet, show a clear banner instead of crashing
 if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL' ||
