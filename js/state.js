@@ -3,14 +3,14 @@
    Central state object shared across all modules.
    ================================================================ */
 
-let currentUser    = null;
-let currentPage    = 'home';
-let allPosts       = [];
-let activeFilter   = 'all';
-let activePostType = 'localscript';
-let activeExt      = '.lua';
-let codeTab        = 'paste';
-let treeItems      = [];
-let treeIdCounter  = 0;
-let authMode       = 'login';
-let currentPost    = null;
+var currentUser    = null;
+var currentPage    = 'home';
+var allPosts       = [];
+var activeFilter   = 'all';
+var activePostType = 'localscript';
+var activeExt      = '.lua';
+var codeTab        = 'paste';
+var treeItems      = [];
+var treeIdCounter  = 0;
+var authMode       = 'login';
+var currentPost    = null;
