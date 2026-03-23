@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenScript — Roblox Open Source Forums</title>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!--
+    ╔══════════════════════════════════════════════════════╗
+    ║  SET YOUR ENVIRONMENT VARIABLES HERE                 ║
+    ║  Replace the strings with your actual Supabase keys. ║
+    ║  ENV VARIABLE NAMES:                                 ║
+    ║    window.ENV_SUPABASE_URL      (project URL)        ║
+    ║    window.ENV_SUPABASE_ANON_KEY (anon/public key)    ║
+    ╚══════════════════════════════════════════════════════╝
+  -->
+  <script>
+    window.ENV_SUPABASE_URL      = "YOUR_SUPABASE_URL";
+    window.ENV_SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  </script>
+</head>
+<body>
+
+<!-- ─── NAV ──────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" onclick="showPage('home')">
+    <div class="nav-logo-icon">OS</div>
+    OpenScript
+  </a>
+  <div class="nav-links">
+    <button class="nav-link active" id="nav-home" onclick="switchNav('home')">Browse</button>
+    <button class="nav-link" id="nav-about" onclick="switchNav('about')">About</button>
+  </div>
+  <div class="nav-spacer"></div>
+  <div id="nav-auth-area">
+    <button class="nav-btn nav-btn-ghost" onclick="showAuthModal('login')" style="margin-right:6px">Sign in</button>
+    <button class="nav-btn nav-btn-primary" onclick="showAuthModal('register')">Join</button>
+  </div>
+  <div id="nav-user-area" style="display:none; align-items:center; gap:10px;">
+    <button class="nav-btn nav-btn-primary" onclick="showCreateModal()">+ New Post</button>
+    <div style="width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;"
+         id="nav-avatar" onclick="showPage('profile')"></div>
+  </div>
+</nav>
+
+<!-- ─── PAGE: HOME ────────────────────────────────────── -->
+<div class="page active" id="page-home">
+  <div class="hero animate-fadeUp">
+    <div class="hero-badge">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;"></span>
+      Client-side only · LocalScripts &amp; ModuleScripts
+    </div>
+    <h1>Open source Roblox scripts, shared simply.</h1>
+    <p>A place for the community to share, discover, and learn from client-side scripts. Clean code, clear structure, no serverside.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="document.getElementById('posts-section').scrollIntoView({behavior:'smooth'})">Browse scripts</button>
+      <button class="btn btn-secondary" onclick="showAuthModal('register')">Share yours</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="stats-bar animate-fadeUp"
+         style="animation-delay:0.05s;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:40px;">
+      <div class="stat"><div class="stat-value" id="stat-posts">—</div><div class="stat-label">Scripts shared</div></div>
+      <div class="stat"><div class="stat-value" id="stat-users">—</div><div class="stat-label">Contributors</div></div>
+      <div class="stat"><div class="stat-value" id="stat-local">—</div><div class="stat-label">LocalScripts</div></div>
+      <div class="stat"><div class="stat-value" id="stat-module">—</div><div class="stat-label">ModuleScripts</div></div>
+    </div>
+
+    <div id="posts-section">
+      <div class="posts-header">
+        <span class="posts-title">Scripts</span>
+        <button class="btn btn-sm btn-secondary" id="create-btn" onclick="showCreateModal()" style="display:none">+ New post</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" class="filter-search" placeholder="Search scripts…" oninput="filterPosts()" id="search-input">
+        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('localscript',this)">LocalScript</button>
+        <button class="filter-btn" onclick="setFilter('modulescript',this)">ModuleScript</button>
+        <button class="filter-btn" onclick="setFilter('custom',this)">Custom</button>
+      </div>
+      <div class="posts-grid" id="posts-list">
+        <!-- skeleton -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div class="skeleton" style="height:90px;border-radius:var(--radius);"></div>
+          <div class="skeleton" style="height:90px;border-radius:var(--radius);"></div>
+          <div class="skeleton" style="height:90px;border-radius:var(--radius);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PAGE: ABOUT ───────────────────────────────────── -->
+<div class="page" id="page-about">
+  <div class="container" style="padding-top:48px;max-width:640px;">
+    <h1 style="font-size:28px;font-weight:600;letter-spacing:-0.3px;margin-bottom:12px;">About OpenScript</h1>
+    <p style="color:var(--text2);font-size:15px;line-height:1.7;font-weight:300;margin-bottom:24px;">
+      OpenScript is a focused community for Roblox developers who want to share and discover client-side scripts.
+      We keep things intentionally simple — only LocalScripts and ModuleScripts are supported, because we believe
+      in clean, transparent, client-run code.
+    </p>
+    <div class="divider"></div>
+    <h2 style="font-size:16px;font-weight:600;margin:24px 0 12px;">What we support</h2>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+        <span class="post-type-badge type-local" style="margin-top:0;">LocalScript</span>
+        <div>
+          <div style="font-size:14px;font-weight:500;">LocalScript</div>
+          <div style="font-size:13px;color:var(--text2);">Runs on the client. Perfect for UI, input handling, and local effects.</div>
+        </div>
+      </div>
+      <div style="padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+        <span class="post-type-badge type-module" style="margin-top:0;">ModuleScript</span>
+        <div>
+          <div style="font-size:14px;font-weight:500;">ModuleScript</div>
+          <div style="font-size:13px;color:var(--text2);">Reusable modules required by LocalScripts. Shared libraries, utilities, components.</div>
+        </div>
+      </div>
+      <div style="padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+        <span class="post-type-badge type-custom" style="margin-top:0;">Custom</span>
+        <div>
+          <div style="font-size:14px;font-weight:500;">Custom types</div>
+          <div style="font-size:13px;color:var(--text2);">JSON configs, data files, or anything that pairs with your script. You define the extension.</div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <p style="font-size:13px;color:var(--text3);">
+      Regular scripts (serverside) are not supported — this keeps the platform safe and focused on what clients can actually run.
+    </p>
+  </div>
+</div>
+
+<!-- ─── PAGE: POST DETAIL ──────────────────────────────── -->
+<div class="page" id="page-post">
+  <div class="container" id="post-detail-content">
+    <!-- filled dynamically by posts.js -->
+  </div>
+</div>
+
+<!-- ─── PAGE: PROFILE ─────────────────────────────────── -->
+<div class="page" id="page-profile">
+  <div class="container" style="padding-top:48px;">
+    <h2 style="font-size:20px;font-weight:600;margin-bottom:20px;">Your profile</h2>
+    <div id="profile-content">Loading…</div>
+  </div>
+</div>
+
+<!-- ─── MODAL: AUTH ───────────────────────────────────── -->
+<div class="modal-overlay" id="auth-modal" style="display:none" onclick="closeAuthModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="auth-modal-title">Sign in</div>
+      <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" type="text" id="auth-username" placeholder="your_username" autocomplete="username">
+      </div>
+      <div class="form-group" id="auth-display-group" style="display:none;">
+        <label class="form-label">Display name <span>(optional)</span></label>
+        <input class="form-input" type="text" id="auth-displayname" placeholder="Your Name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" id="auth-submit-btn" onclick="submitAuth()">
+        Sign in
+      </button>
+      <div class="auth-toggle" id="auth-toggle-text">
+        New here? <a onclick="switchAuthMode()">Create an account</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODAL: CREATE POST ────────────────────────────── -->
+<div class="modal-overlay" id="create-modal" style="display:none" onclick="closeCreateModal(event)">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <div class="modal-title">Share a script</div>
+      <button class="modal-close" onclick="closeCreateModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" type="text" id="post-title" placeholder="e.g. Smooth Camera Controller">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description <span>(optional)</span></label>
+        <textarea class="form-textarea" id="post-desc" placeholder="Describe what your script does, what's interesting about it…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Script type</label>
+        <div class="type-tabs">
+          <button class="type-tab active-local" onclick="setPostType('localscript',this)">LocalScript</button>
+          <button class="type-tab" onclick="setPostType('modulescript',this)">ModuleScript</button>
+          <button class="type-tab" onclick="setPostType('custom',this)">Custom</button>
+        </div>
+        <div id="custom-type-row" style="display:none;margin-top:8px;">
+          <input class="form-input form-mono" type="text" id="custom-ext" placeholder=".json, .txt, .rbxm…" style="width:180px;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">File extension</label>
+        <div class="type-tabs" id="ext-tabs">
+          <button class="type-tab active-local" id="ext-lua"  onclick="setExt('.lua',this)">.lua</button>
+          <button class="type-tab" id="ext-luau"              onclick="setExt('.luau',this)">.luau</button>
+          <button class="type-tab" id="ext-json"              onclick="setExt('.json',this)">.json</button>
+          <button class="type-tab" id="ext-txt"               onclick="setExt('.txt',this)">.txt</button>
+          <button class="type-tab"                            onclick="setExt('custom',this)">+ Custom</button>
+        </div>
+        <div id="custom-ext-row" style="display:none;margin-top:8px;">
+          <input class="form-input form-mono" type="text" id="custom-ext-input" placeholder=".yourext">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-group">
+        <label class="form-label">File structure <span>(optional)</span></label>
+        <div class="form-hint" style="margin-bottom:8px;">Build a visual tree of your script's structure. Viewers can drag nodes around in the sandbox.</div>
+        <div class="tree-builder" id="tree-builder">
+          <div class="tree-builder-header">
+            <span>📁 Project structure</span>
+            <span style="font-size:11px;font-weight:400;">click to edit names</span>
+          </div>
+          <div class="tree-builder-body" id="tree-items"></div>
+          <div class="tree-add-btns">
+            <button class="btn btn-xs btn-secondary" onclick="addTreeItem('file')">+ File</button>
+            <button class="btn btn-xs btn-secondary" onclick="addTreeItem('folder')">+ Folder</button>
+            <button class="btn btn-xs btn-secondary" onclick="addTreeItem('child')">↳ Child</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-group">
+        <label class="form-label">Script</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="filter-btn active" id="code-tab-paste" onclick="setCodeTab('paste')">Paste code</button>
+          <button class="filter-btn"        id="code-tab-link"  onclick="setCodeTab('link')">Raw link</button>
+        </div>
+        <div id="code-paste-area">
+          <textarea class="form-textarea form-mono" id="post-code" rows="10"
+            placeholder="-- Your script here&#10;local Players = game:GetService('Players')&#10;local player = Players.LocalPlayer"></textarea>
+        </div>
+        <div id="code-link-area" style="display:none;">
+          <input class="form-input form-mono" type="url" id="post-rawlink" placeholder="https://raw.githubusercontent.com/…">
+          <div class="form-hint">Link to a raw file (GitHub, Pastebin raw, etc.)</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tags <span>(comma-separated, optional)</span></label>
+        <input class="form-input" type="text" id="post-tags" placeholder="ui, camera, movement, utility">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" id="create-submit-btn" onclick="submitPost()">
+        Publish script
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST AREA ────────────────────────────────────── -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ─── SCRIPTS ───────────────────────────────────────── -->
+<!-- Load order matters: config → state → utils → features → app -->
+<script src="js/config.js"></script>
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/visitor.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/posts.js"></script>
+<script src="js/create.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
