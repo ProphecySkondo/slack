@@ -121,7 +121,7 @@ function renderTreeItems() {
 
 /* ── Submit ── */
 
-let postSubmitting = false;
+var postSubmitting = false;
 
 async function submitPost() {
   if (postSubmitting) return;
